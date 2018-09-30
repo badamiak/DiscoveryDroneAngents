@@ -52,23 +52,22 @@ namespace DiscoveryDroneAngents.CLI
             {
                 Console.WriteLine(GetHelp());
             }
-            else if(input.StartsWith(UserCommands.AddAgent))
+            else if(input.StartsWith(UserCommands.AddDrone))
             {
                 var split = input.Split(' ');
                 var droneName = split[1];
                 var dronePositionX = int.Parse(split[2]);
                 var dronePositionY = int.Parse(split[3]);
                 var droneTurnLikeliness = float.Parse(split[4]);
-                var droneVision = int.Parse(split[5]);
-                var droneSpeed = int.Parse(split[6]);
+
 
                 var config = new DiscoveryDroneConfig(
                     droneName,
                     dronePositionX,
                     dronePositionY,
                     droneTurnLikeliness,
-                    droneVision,
-                    droneSpeed);
+                    2,
+                    1);
 
                 var message = new AddDiscoveryDroneMessage(console, config);
 
@@ -79,7 +78,7 @@ namespace DiscoveryDroneAngents.CLI
                 return "Ussage:" +
                     $"{Environment.NewLine}help - show this help message" +
                     $"{Environment.NewLine}{UserCommands.ShowMap} - show world map" +
-                    $"{Environment.NewLine}{UserCommands.AddAgent} <name> <int positionX> <int positionY> <float turnTikeliness>" +
+                    $"{Environment.NewLine}{UserCommands.AddDrone} <name> <int positionX> <int positionY> <float turnTikeliness>" +
                     $"{Environment.NewLine}{UserCommands.Tick} - call next step" +
                     $"{Environment.NewLine}{UserCommands.Exit} - exit the application";
             }

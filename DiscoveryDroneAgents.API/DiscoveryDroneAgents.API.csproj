@@ -51,6 +51,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MapHelper.cs" />
     <Compile Include="Messages\AddDiscoveryDroneMessage.cs" />
     <Compile Include="Messages\GetMapMessage.cs" />
     <Compile Include="Messages\Message.cs" />
@@ -58,6 +59,8 @@
     <Compile Include="Messages\ReportStatusMessage.cs" />
     <Compile Include="Messages\Responses\GetMapResponseMessage.cs" />
     <Compile Include="Messages\StatusReportMessage.cs" />
+    <Compile Include="Model\DiscoveryDroneConfig.cs" />
+    <Compile Include="Model\DiscoveryDroneStatus.cs" />
     <Compile Include="Model\TileType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

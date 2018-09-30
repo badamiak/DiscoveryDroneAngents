@@ -24,5 +24,9 @@ namespace DiscoveryDroneAgents.API.Model
         /// High Obstacle can't be passed and blocks scanning in that direction
         /// </summary>
         HighObstacle = '▓',
+        /// <summary>
+        /// Drone marker
+        /// </summary>
+        Drone = 'A'
     }
 }

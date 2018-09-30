@@ -15,9 +15,6 @@ namespace DiscoveryDroneAgents.API.Messages
             this.DroneConfig = droneConfig;
         }
 
-        public string Name { get; }
-        public int Range { get; }
-        public int Vision { get; }
         public DiscoveryDroneConfig DroneConfig { get; }
     }
 }

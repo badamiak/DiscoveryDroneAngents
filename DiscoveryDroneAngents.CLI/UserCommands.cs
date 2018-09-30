@@ -12,6 +12,6 @@ namespace DiscoveryDroneAngents.CLI
         public const string Tick = "tick";
         public const string ShowMap = "map";
         public const string Help = "help";
-        public const string AddAgent = "add-agent";
+        public const string AddDrone = "add-drone";
     }
 }

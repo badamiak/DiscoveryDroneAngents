@@ -8,6 +8,7 @@ using Akka.Event;
 using DiscoveryDroneAgents.API.Messages;
 using DiscoveryDroneAgents.API.Messages.Responses;
 using DiscoveryDroneAgents.API.Model;
+using DiscoveryDroneAngents.API;
 
 namespace DiscoveryDroneAgents.Agents
 {
@@ -15,6 +16,7 @@ namespace DiscoveryDroneAgents.Agents
     {
         public ILoggingAdapter logger = Context.GetLogger();
         private Dictionary<Type, Action<Message>> messageHandlers;
+        private Dictionary<string, DiscoveryDroneStatus> DronesStatuses;
         private int worldSizeX = 0;
         private int worldSizeY = 0;
 
@@ -43,10 +45,13 @@ namespace DiscoveryDroneAgents.Agents
             logger.Info("Starting the system");
             logger.Debug("Initiating messageHandlers");
 
+            DronesStatuses = new Dictionary<string, DiscoveryDroneStatus>();
+
             messageHandlers = new Dictionary<Type, Action<Message>>();
 
             messageHandlers.Add(typeof(InitWorldMessage), this.InitWorldHandler);
             messageHandlers.Add(typeof(GetMapMessage), this.GetMapHandler);
+            messageHandlers.Add(typeof(AddDiscoveryDroneMessage), this.AddDroneHandler);
             
 
             logger.Debug("Initiated messageHandlers");
@@ -98,10 +103,15 @@ namespace DiscoveryDroneAgents.Agents
 
         private void GetMapHandler(Message message)
         {
-            (message as GetMapMessage)?.Sender.Tell(new GetMapResponseMessage(Context.Self, this.map, this.worldSizeX, this.worldSizeY));
+            (message as GetMapMessage)?.Sender.Tell(new GetMapResponseMessage(Context.Self, this.map, this.worldSizeX, this.worldSizeY, this.DronesStatuses));
         }
 
+        private void AddDroneHandler(Message message)
+        {
+            var parsed = message as AddDiscoveryDroneMessage;
 
+            Context.ActorOf(Props.Create<DiscoveryDrone>(parsed.DroneConfig, MapHelper.GetUnchartedMap(this.worldSizeX, this.worldSizeY)), parsed.DroneConfig.Name);
+        }
 
     }
 }
