@@ -11,17 +11,16 @@ namespace DiscoveryDroneAgents.API.Messages.Responses
     public class GetMapResponseMessage : Message
     {
         public TileType[,] Map { get; }
-        public Dictionary<string, (int,int)> DronesPositions { get; }
         public int SizeX { get; }
         public int SizeY { get; }
-        public Dictionary<string, DiscoveryDroneStatus> DronesPositions1 { get; }
+        public List<DiscoveryDroneStatus> DronesPositions { get; }
 
-        public GetMapResponseMessage(IActorRef sender, TileType[,] map, int sizeX, int sizeY, Dictionary<string, DiscoveryDroneStatus> dronesPositions) : base(sender)
+        public GetMapResponseMessage(IActorRef sender, TileType[,] map, int sizeX, int sizeY, List<DiscoveryDroneStatus> dronesPositions) : base(sender)
         {
             this.Map = map;
             this.SizeX = sizeX;
             this.SizeY = sizeY;
-            this.DronesPositions1 = dronesPositions;
+            this.DronesPositions = dronesPositions;
         }
     }
 }

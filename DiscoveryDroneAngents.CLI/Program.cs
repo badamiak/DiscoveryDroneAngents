@@ -58,7 +58,7 @@ namespace DiscoveryDroneAngents.CLI
                 var droneName = split[1];
                 var dronePositionX = int.Parse(split[2]);
                 var dronePositionY = int.Parse(split[3]);
-                var droneTurnLikeliness = float.Parse(split[4]);
+                var droneTurnLikeliness = float.Parse(split[4].Replace('.',','));
 
 
                 var config = new DiscoveryDroneConfig(

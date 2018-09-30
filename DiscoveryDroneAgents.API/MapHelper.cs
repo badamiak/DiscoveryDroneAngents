@@ -9,8 +9,13 @@ namespace DiscoveryDroneAngents.API
 {
     public class MapHelper
     {
-        public static string GetMapRepresentation(string mapName, TileType[,] mapMatrix, int sizeX, int sizeY)
+        public static string GetMapRepresentation(string mapName, TileType[,] mapMatrix, int sizeX, int sizeY, IEnumerable<DiscoveryDroneStatus> drones )
         {
+            foreach(var drone in drones)
+            {
+                mapMatrix[drone.PositionX, drone.PositionY] = TileType.Drone;
+            }
+
             var mapArray = mapMatrix.Cast<TileType[]>();
 
             string map = $"{mapName}{Environment.NewLine}";

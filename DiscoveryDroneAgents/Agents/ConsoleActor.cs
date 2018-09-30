@@ -25,7 +25,7 @@ namespace DiscoveryDroneAngents.CLI
             {
                 var parsed = (message as GetMapResponseMessage);
 
-                Console.WriteLine(MapHelper.GetMapRepresentation("World map", parsed.Map, parsed.SizeX, parsed.SizeY));
+                Console.WriteLine(MapHelper.GetMapRepresentation("World map", parsed.Map, parsed.SizeX, parsed.SizeY, parsed.DronesPositions));
             }
         }
 
