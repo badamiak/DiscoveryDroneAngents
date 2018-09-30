@@ -17,7 +17,7 @@ namespace DiscoveryDroneAgents.Agents
     {
         DiscoveryDroneConfig Config { get; }
         private DiscoveryDroneStatus status;
-        Dictionary<Type, Action<Message>> handlers;
+        Dictionary<Type, Action<IMessage>> handlers;
         private MoveDirection moveDirection = MoveDirection.Right;
         public ILoggingAdapter logger = Context.GetLogger();
 
@@ -36,7 +36,7 @@ namespace DiscoveryDroneAgents.Agents
 
             this.status = new DiscoveryDroneStatus(this.Config.Name, config.PositionX, config.PositionY, map);
 
-            this.handlers = new Dictionary<Type, Action<Message>>();
+            this.handlers = new Dictionary<Type, Action<IMessage>>();
             this.handlers.Add(typeof(ReportStatusMessage), this.ReportStatusMessageHandler);
             this.handlers.Add(typeof(StartMovingMessage), this.StartMovingHandler);
             this.handlers.Add(typeof(StopMovingMessage), this.ReportStatusMessageHandler);
@@ -57,7 +57,7 @@ namespace DiscoveryDroneAgents.Agents
 
             if (this.handlers.ContainsKey(message.GetType()))
             {
-                this.handlers[message.GetType()].Invoke(message as Message);
+                this.handlers[message.GetType()].Invoke(message as IMessage);
             }
             else
             {
@@ -72,9 +72,9 @@ namespace DiscoveryDroneAgents.Agents
             logger.Warning("Shutting down");
         }
 
-        private void ReportStatusMessageHandler(Message message)
+        private void ReportStatusMessageHandler(IMessage message)
         {
-            Context.Sender.Tell(new StatusReportMessage(Context.Self, this.status));
+            Context.Sender.Tell(new StatusReportMessage(this.status));
         }
 
         private bool CanMoveTo(int positionX, int positionY)
@@ -88,13 +88,13 @@ namespace DiscoveryDroneAgents.Agents
             this.moveDirection = (MoveDirection)this.random.Next(1, 4);
         }
 
-        private void StartMovingHandler(Message _) => this.timer.Start();
-        private void StopMovingHandler(Message _) => this.timer.Stop();
+        private void StartMovingHandler(IMessage _) => this.timer.Start();
+        private void StopMovingHandler(IMessage _) => this.timer.Stop();
 
 
         private void Move()
         {
-            var perciveTask = parent.Ask<MapUpdate>(new UpdateMapMessage(Self, this.status.PositionX, this.status.PositionY, this.Config.Vision));
+            var perciveTask = parent.Ask<MapUpdate>(new UpdateMapMessage(this.status.PositionX, this.status.PositionY, this.Config.Vision));
             perciveTask.Wait(); //TODO: przyjmij mapę
 
             var newMap = perciveTask.Result;

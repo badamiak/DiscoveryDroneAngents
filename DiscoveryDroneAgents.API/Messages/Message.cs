@@ -10,13 +10,7 @@ namespace DiscoveryDroneAgents.API.Messages
     /// <summary>
     /// marker interface for all messages
     /// </summary>
-    public abstract class Message
+    public interface IMessage
     {
-        public IActorRef Sender { get; }
-
-        public Message(IActorRef sender)
-        {
-            this.Sender = sender;
-        }
     }
 }

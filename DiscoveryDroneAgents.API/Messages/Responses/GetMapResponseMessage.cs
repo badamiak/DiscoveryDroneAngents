@@ -8,14 +8,14 @@ using DiscoveryDroneAgents.API.Model;
 
 namespace DiscoveryDroneAgents.API.Messages.Responses
 {
-    public class GetMapResponseMessage : Message
+    public class GetMapResponseMessage : IMessage
     {
         public TileType[,] Map { get; }
         public int SizeX { get; }
         public int SizeY { get; }
         public List<DiscoveryDroneStatus> DronesPositions { get; }
 
-        public GetMapResponseMessage(IActorRef sender, TileType[,] map, int sizeX, int sizeY, List<DiscoveryDroneStatus> dronesPositions) : base(sender)
+        public GetMapResponseMessage(TileType[,] map, int sizeX, int sizeY, List<DiscoveryDroneStatus> dronesPositions)
         {
             this.Map = map;
             this.SizeX = sizeX;

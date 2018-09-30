@@ -8,9 +8,9 @@ using DiscoveryDroneAgents.API.Model;
 
 namespace DiscoveryDroneAgents.API.Messages
 {
-    public class StatusReportMessage : Message
+    public class StatusReportMessage : IMessage
     {
-        public StatusReportMessage(IActorRef sender, DiscoveryDroneStatus status) : base(sender)
+        public StatusReportMessage(DiscoveryDroneStatus status)
         {
             this.Status = status;
         }

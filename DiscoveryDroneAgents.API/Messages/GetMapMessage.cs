@@ -7,9 +7,9 @@ using Akka.Actor;
 
 namespace DiscoveryDroneAgents.API.Messages
 {
-    public class GetMapMessage : Message
+    public class GetMapMessage : IMessage
     {
-        public GetMapMessage(IActorRef sender, string whoseMap = "world") : base(sender)
+        public GetMapMessage(string whoseMap = "world")
         {
             this.WhoseMap = whoseMap;
         }

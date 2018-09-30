@@ -7,9 +7,9 @@ using Akka.Actor;
 
 namespace DiscoveryDroneAgents.API.Messages
 {
-    public class UpdateMapMessage : Message
+    public class UpdateMapMessage : IMessage
     {
-        public UpdateMapMessage(IActorRef sender, int dronePositionX, int dronePositionY, int vision) : base(sender)
+        public UpdateMapMessage(int dronePositionX, int dronePositionY, int vision)
         {
             this.DronePositionX = dronePositionX;
             this.DronePositionY = dronePositionY;

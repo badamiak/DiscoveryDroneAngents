@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace DiscoveryDroneAgents.API.Messages
 {
-    public class AddDiscoveryDroneMessage: Message
+    public class AddDiscoveryDroneMessage: IMessage
     {
-        public AddDiscoveryDroneMessage(IActorRef sender, DiscoveryDroneConfig droneConfig) : base(sender)
+        public AddDiscoveryDroneMessage(DiscoveryDroneConfig droneConfig)
         {
             this.DroneConfig = droneConfig;
         }

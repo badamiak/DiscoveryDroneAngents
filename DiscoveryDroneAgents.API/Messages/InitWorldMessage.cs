@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 namespace DiscoveryDroneAgents.API.Messages
 {
 
-    public class InitWorldMessage : Message
+    public class InitWorldMessage : IMessage
     {
         private readonly Dictionary<TileType, float> tileTypeProbabilities;
 
-        public InitWorldMessage(IActorRef sender, int sizeX, int sizeY, Dictionary<TileType,float> tileTypeProbabilities) : base(sender)
+        public InitWorldMessage(int sizeX, int sizeY, Dictionary<TileType,float> tileTypeProbabilities)
         {
             this.SizeX = sizeX;
             this.SizeY = sizeY;

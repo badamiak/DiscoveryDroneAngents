@@ -31,7 +31,7 @@ namespace DiscoveryDroneAngents.CLI
 
                 world = system.ActorOf(Props.Create<World>(), "world");
 
-                world.Tell(new InitWorldMessage(console, 70, 20, tileProbabilities));
+                world.Tell(new InitWorldMessage(70, 20, tileProbabilities), console);
 
 
                 string userInput = string.Empty;
@@ -54,11 +54,11 @@ namespace DiscoveryDroneAngents.CLI
 
                     if (split.Count() == 1)
                     {
-                        world.Tell(new GetMapMessage(console, "world"));
+                        world.Tell(new GetMapMessage("world"), console);
                     }
                     else
                     {
-                        world.Tell(new GetMapMessage(console, split[1]));
+                        world.Tell(new GetMapMessage(split[1]), console);
                     }
                 }
                 else if (input == UserCommands.Help)
@@ -67,11 +67,11 @@ namespace DiscoveryDroneAngents.CLI
                 }
                 else if (input.StartsWith(UserCommands.StartDrone))
                 {
-                    world.Tell(new StartMovingMessage(console, input.Split(' ')[1]));
+                    world.Tell(new StartMovingMessage(input.Split(' ')[1]), console);
                 }
                 else if (input.StartsWith(UserCommands.StopDrone))
                 {
-                    world.Tell(new StopMovingMessage(console, input.Split(' ')[1]));
+                    world.Tell(new StopMovingMessage(input.Split(' ')[1]), console);
                 }
                 else if (input.StartsWith(UserCommands.AddDrone))
                 {
@@ -90,9 +90,9 @@ namespace DiscoveryDroneAngents.CLI
                         2,
                         1);
 
-                    var message = new AddDiscoveryDroneMessage(console, config);
+                    var message = new AddDiscoveryDroneMessage(config);
 
-                    world.Tell(message);
+                    world.Tell(message,console);
                 }
                 
             }

@@ -7,9 +7,9 @@ using Akka.Actor;
 
 namespace DiscoveryDroneAgents.API.Messages
 {
-    public class StartMovingMessage : Message
+    public class StartMovingMessage : IMessage
     {
-        public StartMovingMessage(IActorRef sender, string name) : base(sender)
+        public StartMovingMessage(string name)
         {
             this.Name = name;
         }

@@ -7,13 +7,7 @@ using System.Threading.Tasks;
 
 namespace DiscoveryDroneAgents.API.Messages
 {
-    public class ReportStatusMessage: Message
+    public class ReportStatusMessage: IMessage
     {
-        public ReportStatusMessage(IActorRef sender) : base(sender)
-        {
-            this.Sender = sender;
-        }
-
-        public IActorRef Sender { get; }
     }
 }
