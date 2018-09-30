@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Akka.Event;
 using System.Diagnostics;
 using System.Timers;
+using DiscoveryDroneAngents.API;
 
 namespace DiscoveryDroneAgents.Agents
 {
@@ -39,7 +40,7 @@ namespace DiscoveryDroneAgents.Agents
             this.handlers = new Dictionary<Type, Action<IMessage>>();
             this.handlers.Add(typeof(ReportStatusMessage), this.ReportStatusMessageHandler);
             this.handlers.Add(typeof(StartMovingMessage), this.StartMovingHandler);
-            this.handlers.Add(typeof(StopMovingMessage), this.ReportStatusMessageHandler);
+            this.handlers.Add(typeof(StopMovingMessage), this.StopMovingHandler);
         }
 
         protected override void PreStart()
@@ -49,6 +50,8 @@ namespace DiscoveryDroneAgents.Agents
             this.parent = Context.Parent;
 
             logger.Info($"Boot-up: {Self.Path}");
+
+            Percive();
         }
 
         protected override void OnReceive(object message)
@@ -91,20 +94,26 @@ namespace DiscoveryDroneAgents.Agents
         private void StartMovingHandler(IMessage _) => this.timer.Start();
         private void StopMovingHandler(IMessage _) => this.timer.Stop();
 
-
-        private void Move()
+        private void Percive()
         {
             var perciveTask = parent.Ask<MapUpdate>(new UpdateMapMessage(this.status.PositionX, this.status.PositionY, this.Config.Vision));
             perciveTask.Wait(); //TODO: przyjmij mapę
 
-            var newMap = perciveTask.Result;
+            var patch = perciveTask.Result;
 
+            this.status = this.status.UpdateMap(MapHelper.GetUpdatedMap(this.status.Map, patch));
+        }
+
+        private void Move()
+        {
 
             if (this.random.NextDouble() <= this.Config.TurnLikelines)
             {
                 this.ChangeDirection();
             }
+
             bool moved = false;
+
             while (!moved)
             {
                 switch (this.moveDirection)
@@ -148,6 +157,9 @@ namespace DiscoveryDroneAgents.Agents
                 }
                 if (!moved) this.ChangeDirection();
             }
+
+            this.parent.Tell(new StatusReportMessage(this.status));
+            Percive();
         }
     }
 }

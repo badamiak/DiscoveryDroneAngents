@@ -16,7 +16,7 @@ namespace DiscoveryDroneAgents.Agents
     {
         public ILoggingAdapter logger = Context.GetLogger();
         private Dictionary<Type, Action<IMessage>> messageHandlers;
-        private Dictionary<string, DiscoveryDroneStatus> DronesStatuses;
+        private Dictionary<string, DiscoveryDroneStatus> dronesStatuses;
         private int worldSizeX = 0;
         private int worldSizeY = 0;
 
@@ -27,7 +27,7 @@ namespace DiscoveryDroneAgents.Agents
         {
             var messageType = message.GetType();
 
-            logger.Info($"Received message type {messageType}");
+            logger.Debug($"Received message type {messageType}");
 
             if (messageHandlers.ContainsKey(message.GetType()))
             {
@@ -45,7 +45,7 @@ namespace DiscoveryDroneAgents.Agents
             logger.Info("Starting the system");
             logger.Debug("Initiating messageHandlers");
 
-            DronesStatuses = new Dictionary<string, DiscoveryDroneStatus>();
+            dronesStatuses = new Dictionary<string, DiscoveryDroneStatus>();
 
             messageHandlers = new Dictionary<Type, Action<IMessage>>();
 
@@ -53,6 +53,7 @@ namespace DiscoveryDroneAgents.Agents
             messageHandlers.Add(typeof(GetMapMessage), this.GetMapHandler);
             messageHandlers.Add(typeof(UpdateMapMessage), this.UpdateMapHandler);
             messageHandlers.Add(typeof(AddDiscoveryDroneMessage), this.AddDroneHandler);
+            messageHandlers.Add(typeof(StatusReportMessage), this.StatusReportHandler);
             messageHandlers.Add(typeof(StartMovingMessage), this.StartMovingHandler);
             messageHandlers.Add(typeof(StopMovingMessage), this.StopMovingHandler);
 
@@ -60,10 +61,18 @@ namespace DiscoveryDroneAgents.Agents
             logger.Debug("Initiated messageHandlers");
         }
 
+
         protected override void PostStop()
         {
             base.PostStop();
             logger.Info("Stopping the system");
+        }
+
+        private void StatusReportHandler(IMessage message)
+        {
+            var parsed = message as StatusReportMessage;
+
+            this.dronesStatuses[parsed.Status.Name] = parsed.Status;
         }
 
         private void InitWorldHandler(IMessage message)
@@ -91,7 +100,16 @@ namespace DiscoveryDroneAgents.Agents
             {
                 for( int y = 0; y < this.worldSizeY; y++)
                 {
-                    if(x==0 | x == this.worldSizeX-1 | y == 0 | y == worldSizeY-1)
+                    if(
+                        x==0 
+                        || x==1
+                        || x == this.worldSizeX - 1 
+                        || x == this.worldSizeX - 2
+                        || y == 0
+                        || y == 1
+                        || y == worldSizeY - 1
+                        || y == worldSizeY - 2
+                        )
                     {
                         this.map[x, y] = TileType.HighObstacle;
                     }
@@ -110,11 +128,11 @@ namespace DiscoveryDroneAgents.Agents
 
             if(parsed.WhoseMap == "world")
             {
-                Sender.Tell(new GetMapResponseMessage(this.map, this.worldSizeX, this.worldSizeY, this.DronesStatuses.Select(x => x.Value).ToList()));
+                Sender.Tell(new GetMapResponseMessage(this.map, this.worldSizeX, this.worldSizeY, this.dronesStatuses.Select(x => x.Value).ToList()));
             }
             else
             {
-                Sender.Tell(new GetMapResponseMessage(DronesStatuses[parsed.WhoseMap].Map, this.worldSizeX, this.worldSizeY, new List<DiscoveryDroneStatus> { this.DronesStatuses[parsed.WhoseMap] }));
+                Sender.Tell(new GetMapResponseMessage(dronesStatuses[parsed.WhoseMap].Map, this.worldSizeX, this.worldSizeY, new List<DiscoveryDroneStatus> { this.dronesStatuses[parsed.WhoseMap] }));
             }
         }
 
@@ -126,14 +144,33 @@ namespace DiscoveryDroneAgents.Agents
             var newDrone = Context.ActorOf(Props.Create<DiscoveryDrone>(parsed.DroneConfig, unchartedMap), parsed.DroneConfig.Name);
 
             var status = new DiscoveryDroneStatus(parsed.DroneConfig.Name, parsed.DroneConfig.PositionX, parsed.DroneConfig.PositionY, unchartedMap);
-            this.DronesStatuses.Add(parsed.DroneConfig.Name, status);
+            this.dronesStatuses.Add(parsed.DroneConfig.Name, status);
         }
 
         private void UpdateMapHandler(IMessage message)
         {
             var parsed = message as UpdateMapMessage;
 
-            Sender.Tell(new MapUpdate(null, 0, 0, 0, 0));
+            var patchSize = 1 + parsed.Vision * 2;
+            var patchStartPositionX = parsed.DronePositionX - parsed.Vision;
+            var patchStartPositionY = parsed.DronePositionY - parsed.Vision;
+            TileType[,] patch = new TileType[patchSize, patchSize];
+
+            int patchX = 0;
+            int patchY = 0;
+
+            for (int x = patchStartPositionX ; x <= parsed.DronePositionX + parsed.Vision; x++)
+            {
+                patchY = 0;
+                for(int y = patchStartPositionY; y <= parsed.DronePositionY + parsed.Vision; y++)
+                {
+                    patch[patchX, patchY] = this.map[x, y];
+                    patchY++;
+                }
+                patchX++;
+            }
+
+            Sender.Tell(new MapUpdate(patch, patchStartPositionX, patchStartPositionY, patchSize, patchSize));
         }
 
         private void StartMovingHandler(IMessage message)

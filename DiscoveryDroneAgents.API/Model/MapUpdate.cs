@@ -8,7 +8,7 @@ namespace DiscoveryDroneAgents.API.Model
 {
     public class MapUpdate
     {
-        TileType[,] Patch { get; }
+        public TileType[,] mapFragment { get; }
         public int PositionX { get; }
         public int PositionY { get; }
         public int SizeX { get; }
@@ -16,7 +16,7 @@ namespace DiscoveryDroneAgents.API.Model
 
         public MapUpdate(TileType[,] patch, int positionX, int positionY, int sizeX, int sizeY)
         {
-            this.Patch = patch;
+            this.mapFragment = patch;
             this.PositionX = positionX;
             this.PositionY = positionY;
             this.SizeX = sizeX;

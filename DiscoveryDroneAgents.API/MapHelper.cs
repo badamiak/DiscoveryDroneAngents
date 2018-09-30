@@ -9,22 +9,23 @@ namespace DiscoveryDroneAngents.API
 {
     public class MapHelper
     {
-        public static string GetMapRepresentation(string mapName, TileType[,] mapMatrix, int sizeX, int sizeY, IEnumerable<DiscoveryDroneStatus> drones )
+        public static string GetMapRepresentation(string mapName, TileType[,] mapMatrix, int sizeX, int sizeY, List<DiscoveryDroneStatus> drones )
         {
-            foreach(var drone in drones)
-            {
-                mapMatrix[drone.PositionX, drone.PositionY] = TileType.Drone;
-            }
-
-            var mapArray = mapMatrix.Cast<TileType[]>();
-
-            string map = $"{mapName}{Environment.NewLine}";
+            string header = $"{mapName}{Environment.NewLine}";
+            string map = string.Empty;
 
             for (int y = 0; y < sizeY; y++)
             {
                 for (int x = 0; x < sizeX; x++)
                 {
-                    map += (char)mapMatrix[x, y];
+                    if(drones.Any(drone=> drone.PositionX == x && drone.PositionY == y))
+                    {
+                        map += (char)TileType.Drone;
+                    }
+                    else
+                    {
+                        map += (char)mapMatrix[x, y];
+                    }
                 }
                 map += Environment.NewLine;
             }
@@ -57,12 +58,12 @@ namespace DiscoveryDroneAngents.API
             return map;
         }
 
-        public static TileType[,] GetUpdatedMap(TileType[,] knownMap, TileType[,] mapUdate, int updatePositionX, int updatePositionY, int updateSizeX, int updateSizeY)
+        public static TileType[,] GetUpdatedMap(TileType[,] knownMap, MapUpdate patch)
         {
-            for(int x = 0; x < updateSizeX; x++)
+            for(int x = 0; x < patch.SizeX; x++)
             {
-                for (int y = 0; y < updateSizeX; y++)
-                    knownMap[x + updatePositionX, y + updatePositionY] = mapUdate[x, y];
+                for (int y = 0; y < patch.SizeY; y++)
+                    knownMap[x + patch.PositionX, y + patch.PositionY] = patch.mapFragment[x, y];
             }
             return knownMap;
         }
