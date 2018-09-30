@@ -22,6 +22,7 @@ namespace DiscoveryDroneAgents.Agents
         public ILoggingAdapter logger = Context.GetLogger();
 
         private Timer timer;
+        private IActorRef parent;
         private readonly Random random;
 
         public DiscoveryDrone(DiscoveryDroneConfig config, TileType[,] map)
@@ -45,15 +46,15 @@ namespace DiscoveryDroneAgents.Agents
         {
             base.PreStart();
 
-            var getInitioalVisionTask = Context.Parent.Ask(new UpdateMapMessage(Context.Self, this.status.PositionX, this.status.PositionY, this.Config.Vision));
-            getInitioalVisionTask.Wait(); //TODO: przyjmij mapę
+            this.parent = Context.Parent;
 
-            var newMap = getInitioalVisionTask.Result as MapUpdate;
-
+            logger.Info($"Boot-up: {Self.Path}");
         }
 
         protected override void OnReceive(object message)
         {
+            logger.Debug($"Received message {message}");
+
             if (this.handlers.ContainsKey(message.GetType()))
             {
                 this.handlers[message.GetType()].Invoke(message as Message);
@@ -62,6 +63,13 @@ namespace DiscoveryDroneAgents.Agents
             {
                 this.logger.Warning($"Unknown message type {message.GetType()} -> {message}");
             }
+        }
+
+        protected override void PostStop()
+        {
+            base.PostStop();
+
+            logger.Warning("Shutting down");
         }
 
         private void ReportStatusMessageHandler(Message message)
@@ -86,6 +94,12 @@ namespace DiscoveryDroneAgents.Agents
 
         private void Move()
         {
+            var perciveTask = parent.Ask<MapUpdate>(new UpdateMapMessage(Self, this.status.PositionX, this.status.PositionY, this.Config.Vision));
+            perciveTask.Wait(); //TODO: przyjmij mapę
+
+            var newMap = perciveTask.Result;
+
+
             if (this.random.NextDouble() <= this.Config.TurnLikelines)
             {
                 this.ChangeDirection();
