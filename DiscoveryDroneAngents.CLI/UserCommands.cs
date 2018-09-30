@@ -13,5 +13,7 @@ namespace DiscoveryDroneAngents.CLI
         public const string ShowMap = "map";
         public const string Help = "help";
         public const string AddDrone = "add-drone";
+        public const string StartDrone = "start-drone";
+        public const string StopDrone = "stop-drone";
     }
 }

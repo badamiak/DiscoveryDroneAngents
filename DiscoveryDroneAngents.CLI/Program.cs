@@ -25,11 +25,11 @@ namespace DiscoveryDroneAngents.CLI
             tileProbabilities.Add(TileType.LowObstacle, 0.1f);
             tileProbabilities.Add(TileType.Passable, 0.86f);
 
-            using (var system = ActorSystem.Create("World"))
+            using (var system = ActorSystem.Create("Mars"))
             {
                 console = system.ActorOf(Props.Create<ConsoleActor>());
 
-                world = system.ActorOf(Props.Create<World>());
+                world = system.ActorOf(Props.Create<World>(), "world");
 
                 world.Tell(new InitWorldMessage(console, 70, 20, tileProbabilities));
 
@@ -46,44 +46,70 @@ namespace DiscoveryDroneAngents.CLI
 
         static void UserInputHandler(string input)
         {
-            if (input.StartsWith(UserCommands.ShowMap))
+            try
             {
-                var split = input.Split(' ');
+                if (input.StartsWith(UserCommands.ShowMap))
+                {
+                    var split = input.Split(' ');
 
-                world.Tell(new GetMapMessage(console, split[1]));
+                    if (split.Count() == 1)
+                    {
+                        world.Tell(new GetMapMessage(console, "world"));
+                    }
+                    else
+                    {
+                        world.Tell(new GetMapMessage(console, split[1]));
+                    }
+                }
+                else if (input == UserCommands.Help)
+                {
+                    Console.WriteLine(GetHelp());
+                }
+                else if (input.StartsWith(UserCommands.StartDrone))
+                {
+                    world.Tell(new StartMovingMessage(console, input.Split(' ')[1]));
+                }
+                else if (input.StartsWith(UserCommands.StopDrone))
+                {
+                    world.Tell(new StopMovingMessage(console, input.Split(' ')[1]));
+                }
+                else if (input.StartsWith(UserCommands.AddDrone))
+                {
+                    var split = input.Split(' ');
+                    var droneName = split[1];
+                    var dronePositionX = int.Parse(split[2]);
+                    var dronePositionY = int.Parse(split[3]);
+                    var droneTurnLikeliness = float.Parse(split[4].Replace('.', ','));
+
+
+                    var config = new DiscoveryDroneConfig(
+                        droneName,
+                        dronePositionX,
+                        dronePositionY,
+                        droneTurnLikeliness,
+                        2,
+                        1);
+
+                    var message = new AddDiscoveryDroneMessage(console, config);
+
+                    world.Tell(message);
+                }
+                
             }
-            else if(input == UserCommands.Help)
+            catch(Exception e)
             {
+                Console.WriteLine(e);
                 Console.WriteLine(GetHelp());
             }
-            else if(input.StartsWith(UserCommands.AddDrone))
-            {
-                var split = input.Split(' ');
-                var droneName = split[1];
-                var dronePositionX = int.Parse(split[2]);
-                var dronePositionY = int.Parse(split[3]);
-                var droneTurnLikeliness = float.Parse(split[4].Replace('.',','));
 
-
-                var config = new DiscoveryDroneConfig(
-                    droneName,
-                    dronePositionX,
-                    dronePositionY,
-                    droneTurnLikeliness,
-                    2,
-                    1);
-
-                var message = new AddDiscoveryDroneMessage(console, config);
-
-                world.Tell(message);
-            }
             string GetHelp()
             {
                 return "Ussage:" +
                     $"{Environment.NewLine}help - show this help message" +
                     $"{Environment.NewLine}{UserCommands.ShowMap} <whose> - show <whose> map" +
                     $"{Environment.NewLine}{UserCommands.AddDrone} <name> <int positionX> <int positionY> <float turnTikeliness>" +
-                    $"{Environment.NewLine}{UserCommands.Tick} - call next step" +
+                    $"{Environment.NewLine}{UserCommands.StartDrone} <name> - call next step" +
+                    $"{Environment.NewLine}{UserCommands.StopDrone} <name> - call next step" +
                     $"{Environment.NewLine}{UserCommands.Exit} - exit the application";
             }
 

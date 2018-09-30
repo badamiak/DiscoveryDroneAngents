@@ -58,7 +58,9 @@
     <Compile Include="Messages\InitWorldMessage.cs" />
     <Compile Include="Messages\ReportStatusMessage.cs" />
     <Compile Include="Messages\Responses\GetMapResponseMessage.cs" />
+    <Compile Include="Messages\StartMovingMessage.cs" />
     <Compile Include="Messages\StatusReportMessage.cs" />
+    <Compile Include="Messages\StopMovingMessage.cs" />
     <Compile Include="Messages\UpdateMapMessage.cs" />
     <Compile Include="Model\DiscoveryDroneConfig.cs" />
     <Compile Include="Model\DiscoveryDroneStatus.cs" />

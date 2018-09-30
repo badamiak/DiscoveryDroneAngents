@@ -52,7 +52,6 @@ namespace DiscoveryDroneAgents.Agents
             messageHandlers.Add(typeof(InitWorldMessage), this.InitWorldHandler);
             messageHandlers.Add(typeof(GetMapMessage), this.GetMapHandler);
             messageHandlers.Add(typeof(AddDiscoveryDroneMessage), this.AddDroneHandler);
-            messageHandlers.Add(typeof(UpdateMapMessage), this.UpdateMapHandler);
             
 
             logger.Debug("Initiated messageHandlers");
@@ -104,46 +103,15 @@ namespace DiscoveryDroneAgents.Agents
 
         private void GetMapHandler(Message message)
         {
-            var parsed = message as GetMapMessage;
-
-            if (parsed.WhoseMap == "world")
-            {
-                parsed.Sender.Tell(new GetMapResponseMessage(Context.Self, this.map, this.worldSizeX, this.worldSizeY, this.DronesStatuses.Select(x => x.Value).ToList()));
-            }
-            else
-            {
-                var map = this.DronesStatuses[parsed.WhoseMap].Map;
-                parsed.Sender.Tell(new GetMapResponseMessage(Context.Self, map, this.worldSizeX, this.worldSizeY, new List<DiscoveryDroneStatus>() { this.DronesStatuses[parsed.WhoseMap] }));
-            }
+            (message as GetMapMessage)?.Sender.Tell(new GetMapResponseMessage(Context.Self, this.map, this.worldSizeX, this.worldSizeY, new List<DiscoveryDroneStatus> this.DronesStatuses));
         }
 
         private void AddDroneHandler(Message message)
         {
             var parsed = message as AddDiscoveryDroneMessage;
-            var emptyMap = MapHelper.GetUnchartedMap(this.worldSizeX, this.worldSizeY);
 
-            var droneStatus = new DiscoveryDroneStatus(parsed.DroneConfig.Name, parsed.DroneConfig.PositionX, parsed.DroneConfig.PositionY, emptyMap);
-
-            this.DronesStatuses.Add(parsed.DroneConfig.Name, droneStatus);
-
-            Context.ActorOf(Props.Create<DiscoveryDrone>(parsed.DroneConfig, emptyMap), parsed.DroneConfig.Name);
+            Context.ActorOf(Props.Create<DiscoveryDrone>(parsed.DroneConfig, MapHelper.GetUnchartedMap(this.worldSizeX, this.worldSizeY)), parsed.DroneConfig.Name);
         }
-
-        private void StatusReportHandler(Message message)
-        {
-            var parsed = message as StatusReportMessage;
-
-            this.DronesStatuses[parsed.Status.Name] = parsed.Status;
-        }
-
-        private void UpdateMapHandler(Message message)
-        {
-            var update = new MapUpdate(null, 0, 0, 0, 0);
-
-            Sender.Tell(update);
-        }
-
-
 
     }
 }

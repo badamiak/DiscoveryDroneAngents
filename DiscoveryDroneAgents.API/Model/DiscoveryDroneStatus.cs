@@ -20,5 +20,16 @@ namespace DiscoveryDroneAgents.API.Model
         public int PositionX { get; }
         public int PositionY { get; }
         public TileType[,] Map { get; }
+
+        public DiscoveryDroneStatus Move(int positionX, int positionY)
+        {
+            return new DiscoveryDroneStatus(this.Name, positionX, positionY, this.Map);
+        }
+
+        public DiscoveryDroneStatus UpdateMap(TileType[,] map)
+        {
+            return new DiscoveryDroneStatus(this.Name, this.PositionX, this.PositionY, map);
+
+        }
     }
 }
