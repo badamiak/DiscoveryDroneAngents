@@ -46,8 +46,12 @@ namespace DiscoveryDroneAngents.CLI
 
         static void UserInputHandler(string input)
         {
-            if (input == UserCommands.ShowMap)
-                world.Tell(new GetMapMessage(console));
+            if (input.StartsWith(UserCommands.ShowMap))
+            {
+                var split = input.Split(' ');
+
+                world.Tell(new GetMapMessage(console, split[1]));
+            }
             else if(input == UserCommands.Help)
             {
                 Console.WriteLine(GetHelp());
@@ -77,7 +81,7 @@ namespace DiscoveryDroneAngents.CLI
             {
                 return "Ussage:" +
                     $"{Environment.NewLine}help - show this help message" +
-                    $"{Environment.NewLine}{UserCommands.ShowMap} - show world map" +
+                    $"{Environment.NewLine}{UserCommands.ShowMap} <whose> - show <whose> map" +
                     $"{Environment.NewLine}{UserCommands.AddDrone} <name> <int positionX> <int positionY> <float turnTikeliness>" +
                     $"{Environment.NewLine}{UserCommands.Tick} - call next step" +
                     $"{Environment.NewLine}{UserCommands.Exit} - exit the application";

@@ -31,6 +31,14 @@ namespace DiscoveryDroneAgents.Agents
             this.handlers.Add(typeof(ReportStatusMessage), ReportStatusMessageHandler);
         }
 
+        protected override void PreStart()
+        {
+            base.PreStart();
+
+            var getInitioalVisionTask = Context.Parent.Ask(new UpdateMapMessage(Context.Self, status.PositionX, status.PositionY, Config.Vision));
+            getInitioalVisionTask.Wait();
+        }
+
         protected override void OnReceive(object message)
         {
             if (handlers.ContainsKey(message.GetType()))

@@ -59,8 +59,11 @@
     <Compile Include="Messages\ReportStatusMessage.cs" />
     <Compile Include="Messages\Responses\GetMapResponseMessage.cs" />
     <Compile Include="Messages\StatusReportMessage.cs" />
+    <Compile Include="Messages\UpdateMapMessage.cs" />
     <Compile Include="Model\DiscoveryDroneConfig.cs" />
     <Compile Include="Model\DiscoveryDroneStatus.cs" />
+    <Compile Include="Model\MapUpdate.cs" />
+    <Compile Include="Model\MoveDirection.cs" />
     <Compile Include="Model\TileType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
