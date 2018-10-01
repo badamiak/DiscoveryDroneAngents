@@ -15,5 +15,9 @@ namespace DiscoveryDroneAngents.CLI
         public const string AddDrone = "add-drone";
         public const string StartDrone = "start-drone";
         public const string StopDrone = "stop-drone";
+        public const string MonitorStart = "monitor start";
+        public const string MonitorStop = "monitor stop";
+
+        public const string Demo = "demo";
     }
 }

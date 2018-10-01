@@ -31,7 +31,7 @@ namespace DiscoveryDroneAgents.Agents
             this.Config = config;
 
             this.random = new Random();
-            this.timer = new Timer(5000);
+            this.timer = new Timer(config.MoveInterval*1000);
             this.timer.Elapsed += (sender, evantArgs) => this.Move();
             this.timer.AutoReset = true;
 

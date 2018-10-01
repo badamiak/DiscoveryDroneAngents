@@ -17,7 +17,7 @@ namespace DiscoveryDroneAgents.API.Model
         /// </summary>
         Passable = ' ',
         /// <summary>
-        /// Low obstacle means an unpassable terraing but low enought to scan throug it
+        /// Low obstacle is recognized as obstacle but can be passed
         /// </summary>
         LowObstacle = '▒',
         /// <summary>
