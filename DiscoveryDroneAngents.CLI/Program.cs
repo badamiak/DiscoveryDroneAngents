@@ -22,6 +22,7 @@ namespace DiscoveryDroneAngents.CLI
         const int MONITOR_TICK_MS = 1000;
         static Timer monitorTimer = new Timer(MONITOR_TICK_MS);
         static string monitoredEntity = "world";
+        private static ActorSystem actorSystem;
         static void Main(string[] args)
         {
             monitorTimer.AutoReset = true;
@@ -32,11 +33,11 @@ namespace DiscoveryDroneAngents.CLI
             tileProbabilities.Add(TileType.LowObstacle, 0.1f);
             tileProbabilities.Add(TileType.Passable, 0.86f);
 
-            using (var system = ActorSystem.Create("Mars"))
+            using (actorSystem = ActorSystem.Create("Mars"))
             {
-                console = system.ActorOf(Props.Create<ConsoleActor>());
+                console = actorSystem.ActorOf(Props.Create<ConsoleActor>());
 
-                world = system.ActorOf(Props.Create<World>(), "world");
+                world = actorSystem.ActorOf(Props.Create<World>(), "world");
 
                 world.Tell(new InitWorldMessage(70, 20, tileProbabilities), console);
 
@@ -53,7 +54,23 @@ namespace DiscoveryDroneAngents.CLI
 
         static void Monitor()
         {
-            world.Tell(new GetMapMessage(monitoredEntity), console);
+            GetMapHandler(monitoredEntity);
+        }
+
+        static void GetMapHandler(string whoseMap)
+        {
+            if (whoseMap == "world")
+            {
+                world.Tell(new GetMapMessage("world"), console);
+            }
+            else if (whoseMap == "relay")
+            {
+                actorSystem.ActorSelection($"akka://{actorSystem.Name}/user/world/{whoseMap}").Tell(new GetMapMessage($"{whoseMap}"), console);
+            }
+            else
+            {
+                actorSystem.ActorSelection($"akka://{actorSystem.Name}/user/world/relay/").Tell(new GetMapMessage($"{whoseMap}"), console);
+            }
         }
 
         static void UserInputHandler(string input)
@@ -64,14 +81,8 @@ namespace DiscoveryDroneAngents.CLI
                 {
                     var split = input.Split(' ');
 
-                    if (split.Count() == 1)
-                    {
-                        world.Tell(new GetMapMessage("world"), console);
-                    }
-                    else
-                    {
-                        world.Tell(new GetMapMessage(split[1]), console);
-                    }
+                    GetMapHandler(split.Count() == 1 ? "world" : split[1]);
+
                 }
                 else if (input == UserCommands.Help)
                 {
@@ -96,11 +107,11 @@ namespace DiscoveryDroneAngents.CLI
                 }
                 else if (input.StartsWith(UserCommands.StartDrone))
                 {
-                    world.Tell(new StartMovingMessage(input.Split(' ')[1]), console);
+                    actorSystem.ActorSelection($"akka://{actorSystem.Name}/user/world/relay/").Tell(new StartMovingMessage(input.Split(' ')[1]), console);
                 }
                 else if (input.StartsWith(UserCommands.StopDrone))
                 {
-                    world.Tell(new StopMovingMessage(input.Split(' ')[1]), console);
+                    actorSystem.ActorSelection($"akka://{actorSystem.Name}/user/world/relay/").Tell(new StopMovingMessage(input.Split(' ')[1]), console);
                 }
                 else if (input.StartsWith(UserCommands.AddDrone))
                 {
@@ -123,7 +134,7 @@ namespace DiscoveryDroneAngents.CLI
 
                     var message = new AddDiscoveryDroneMessage(config);
 
-                    world.Tell(message, console);
+                    actorSystem.ActorSelection($"akka://{actorSystem.Name}/user/world/relay/").Tell(message, console);
                 }
                 
             }

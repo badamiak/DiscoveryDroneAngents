@@ -53,6 +53,7 @@
   <ItemGroup>
     <Compile Include="Agents\ConsoleActor.cs" />
     <Compile Include="Agents\DiscoveryDrone.cs" />
+    <Compile Include="Agents\Relay.cs" />
     <Compile Include="Agents\World.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

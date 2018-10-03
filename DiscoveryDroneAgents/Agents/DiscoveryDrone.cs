@@ -24,6 +24,7 @@ namespace DiscoveryDroneAgents.Agents
 
         private Timer timer;
         private IActorRef parent;
+        private ActorSelection world;
         private readonly Random random;
 
         public DiscoveryDrone(DiscoveryDroneConfig config, TileType[,] map)
@@ -48,6 +49,7 @@ namespace DiscoveryDroneAgents.Agents
             base.PreStart();
 
             this.parent = Context.Parent;
+            this.world = Context.ActorSelection($"akka://{Context.System.Name}/user/world/");
 
             logger.Info($"Boot-up: {Self.Path}");
 
@@ -88,7 +90,7 @@ namespace DiscoveryDroneAgents.Agents
 
         private void ChangeDirection()
         {
-            this.moveDirection = (MoveDirection)this.random.Next(1, 4);
+            this.moveDirection = (MoveDirection)this.random.Next(1, 5);
         }
 
         private void StartMovingHandler(IMessage _) => this.timer.Start();
@@ -96,7 +98,8 @@ namespace DiscoveryDroneAgents.Agents
 
         private void Percive()
         {
-            var perciveTask = parent.Ask<MapUpdate>(new UpdateMapMessage(this.status.PositionX, this.status.PositionY, this.Config.Vision));
+            var perciveTask = world.Ask<MapUpdate>(new UpdateMapMessage(this.status.PositionX, this.status.PositionY, this.Config.Vision));
+
             perciveTask.Wait(); //TODO: przyjmij mapę
 
             var patch = perciveTask.Result;
@@ -158,8 +161,9 @@ namespace DiscoveryDroneAgents.Agents
                 if (!moved) this.ChangeDirection();
             }
 
-            this.parent.Tell(new StatusReportMessage(this.status));
             Percive();
+            this.parent.Tell(new StatusReportMessage(this.status));
+            world.Tell(new StatusReportMessage(this.status));
         }
     }
 }

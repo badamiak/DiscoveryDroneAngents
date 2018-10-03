@@ -52,10 +52,7 @@ namespace DiscoveryDroneAgents.Agents
             messageHandlers.Add(typeof(InitWorldMessage), this.InitWorldHandler);
             messageHandlers.Add(typeof(GetMapMessage), this.GetMapHandler);
             messageHandlers.Add(typeof(UpdateMapMessage), this.UpdateMapHandler);
-            messageHandlers.Add(typeof(AddDiscoveryDroneMessage), this.AddDroneHandler);
             messageHandlers.Add(typeof(StatusReportMessage), this.StatusReportHandler);
-            messageHandlers.Add(typeof(StartMovingMessage), this.StartMovingHandler);
-            messageHandlers.Add(typeof(StopMovingMessage), this.StopMovingHandler);
 
 
             logger.Debug("Initiated messageHandlers");
@@ -120,33 +117,26 @@ namespace DiscoveryDroneAgents.Agents
                     }
                 }
             }
+
+            Context.ActorOf(Props.Create<Relay>(MapHelper.GetUnchartedMap(worldSizeX, worldSizeY), worldSizeX, worldSizeY), "relay");
         }
 
+        /// <summary>
+        /// Answers with map known by message.WhoseMap;
+        /// </summary>
+        /// <param name="message"></param>
         private void GetMapHandler(IMessage message)
         {
             var parsed = message as GetMapMessage;
 
-            if(parsed.WhoseMap == "world")
-            {
-                Sender.Tell(new GetMapResponseMessage(this.map, this.worldSizeX, this.worldSizeY, this.dronesStatuses.Select(x => x.Value).ToList()));
-            }
-            else
-            {
-                Sender.Tell(new GetMapResponseMessage(dronesStatuses[parsed.WhoseMap].Map, this.worldSizeX, this.worldSizeY, new List<DiscoveryDroneStatus> { this.dronesStatuses[parsed.WhoseMap] }));
-            }
+            Sender.Tell(new GetMapResponseMessage(this.map, this.worldSizeX, this.worldSizeY, this.dronesStatuses.Select(x => x.Value).ToList()));
+
         }
 
-        private void AddDroneHandler(IMessage message)
-        {
-            var parsed = message as AddDiscoveryDroneMessage;
-
-            var unchartedMap = MapHelper.GetUnchartedMap(this.worldSizeX, this.worldSizeY);
-            var newDrone = Context.ActorOf(Props.Create<DiscoveryDrone>(parsed.DroneConfig, unchartedMap), parsed.DroneConfig.Name);
-
-            var status = new DiscoveryDroneStatus(parsed.DroneConfig.Name, parsed.DroneConfig.PositionX, parsed.DroneConfig.PositionY, unchartedMap);
-            this.dronesStatuses.Add(parsed.DroneConfig.Name, status);
-        }
-
+        /// <summary>
+        /// Receives request for map update at position in some distance
+        /// </summary>
+        /// <param name="message"></param>
         private void UpdateMapHandler(IMessage message)
         {
             var parsed = message as UpdateMapMessage;
@@ -171,22 +161,6 @@ namespace DiscoveryDroneAgents.Agents
             }
 
             Sender.Tell(new MapUpdate(patch, patchStartPositionX, patchStartPositionY, patchSize, patchSize));
-        }
-
-        private void StartMovingHandler(IMessage message)
-        {
-            var parsed = message as StartMovingMessage;
-
-            var drone = Context.ActorSelection($"akka://{Context.System.Name}/user/world/{parsed.Name}");
-            drone.Tell(message);
-        }
-
-        private void StopMovingHandler(IMessage message)
-        {
-            var parsed = message as StopMovingMessage;
-
-            var drone = Context.ActorSelection($"akka://{Context.System.Name}/user/world/{parsed.Name}");
-            drone.Tell(message);
         }
     }
 }

@@ -45,7 +45,14 @@ namespace DiscoveryDroneAngents.API
             {
                 for(int y = 0; y< sizeY; y++)
                 {
-                    if (x==0 | y==0 | x == sizeX-1| y == sizeY-1)
+                    if (x == 0
+                        || x == 1
+                        || x == sizeX - 1
+                        || x == sizeX - 2
+                        || y == 0
+                        || y == 1
+                        || y == sizeY - 1
+                        || y == sizeY - 2)
                     {
                         map[x, y] = TileType.HighObstacle;
                     }
@@ -56,6 +63,32 @@ namespace DiscoveryDroneAngents.API
                 }
             }
             return map;
+        }
+
+        public static TileType[,] CorelateMaps(TileType[,] map1, TileType[,] map2, int sizeX, int sizeY)
+        {
+            var resultingMap = new TileType[sizeX, sizeY];
+
+            for (int x = 0; x < sizeX; x++)
+            {
+                for (int y = 0; y < sizeY; y++)
+                {
+                    if(map1[x,y] == TileType.Uncharted && map2[x,y] == TileType.Uncharted)
+                    {
+                        resultingMap[x,y] = map1[x, y];
+                    }
+                    else if (map1[x,y] == TileType.Uncharted)
+                    {
+                        resultingMap[x, y] = map2[x, y];
+                    }
+                    else
+                    {
+                        resultingMap[x, y] = map1[x, y];
+                    }
+                }
+            }
+
+            return resultingMap;
         }
 
         public static TileType[,] GetUpdatedMap(TileType[,] knownMap, MapUpdate patch)
