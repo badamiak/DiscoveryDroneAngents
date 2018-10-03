@@ -161,6 +161,7 @@ namespace DiscoveryDroneAngents.CLI
 
         static void Demo()
         {
+            var relay = actorSystem.ActorSelection($"akka://{actorSystem.Name}/user/world/relay/");
             void Wait() => Thread.Sleep(3000);
 
             Console.WriteLine("Let us conquer Mars, or room, or sandbox or some other space");
@@ -171,7 +172,7 @@ namespace DiscoveryDroneAngents.CLI
             Wait();
             Wait();
 
-            world.Tell(new GetMapMessage(), console);
+            GetMapHandler("world");
             Wait();
 
             Console.WriteLine("Adding drone");
@@ -184,7 +185,7 @@ namespace DiscoveryDroneAngents.CLI
             Wait();
             Wait();
 
-            world.Tell(new AddDiscoveryDroneMessage(new DiscoveryDroneConfig("Dave", 23, 12, 0.2f, 2, 2)));
+            relay.Tell(new AddDiscoveryDroneMessage(new DiscoveryDroneConfig("Dave", 23, 12, 0.2f, 2, 2)));
             Wait();
 
             Console.WriteLine("Now look again at the map, the drone is visible as an 'A'");
@@ -192,7 +193,7 @@ namespace DiscoveryDroneAngents.CLI
             Wait();
             Wait();
 
-            world.Tell(new GetMapMessage(), console);
+            GetMapHandler("world");
             Wait();
             Wait();
 
@@ -201,9 +202,9 @@ namespace DiscoveryDroneAngents.CLI
 
             Console.WriteLine(">add-drone Hal 65 37 0.05 5");
             Wait();
-            world.Tell(new AddDiscoveryDroneMessage(new DiscoveryDroneConfig("Hal", 65, 17, 0.05f, 2, 5)));
+            relay.Tell(new AddDiscoveryDroneMessage(new DiscoveryDroneConfig("Hal", 65, 17, 0.05f, 2, 5)));
 
-            world.Tell(new GetMapMessage(), console);
+            GetMapHandler("world");
 
             Console.WriteLine("It's on the lower right of the map");
             Wait();
@@ -214,7 +215,7 @@ namespace DiscoveryDroneAngents.CLI
             Wait();
             Wait();
 
-            world.Tell(new GetMapMessage("Dave"), console);
+            GetMapHandler("Dave");
             Wait();
             Wait();
             Wait();
@@ -223,7 +224,7 @@ namespace DiscoveryDroneAngents.CLI
             Console.WriteLine(">map Hal");
             Wait();
 
-            world.Tell(new GetMapMessage("Hal"), console);
+            GetMapHandler("Hal");
 
             Wait();
             Wait();
@@ -240,8 +241,8 @@ namespace DiscoveryDroneAngents.CLI
             Console.WriteLine(">start-drone Dave");
             Console.WriteLine(">start-drone Hal");
             Wait();
-            world.Tell(new StartMovingMessage("Dave"));
-            world.Tell(new StartMovingMessage("Hal"));
+            relay.Tell(new StartMovingMessage("Dave"));
+            relay.Tell(new StartMovingMessage("Hal"));
 
             Console.WriteLine("They should be moving right now, lets see how are they doing");
             Wait();
@@ -278,7 +279,7 @@ namespace DiscoveryDroneAngents.CLI
             Console.WriteLine(">map Hal");
             Wait();
 
-            world.Tell(new GetMapMessage("Hal"), console);
+            GetMapHandler("Hal");
             Wait();
             Wait();
 
@@ -291,9 +292,9 @@ namespace DiscoveryDroneAngents.CLI
             Wait();
             Wait();
 
-            world.Tell(new AddDiscoveryDroneMessage(new DiscoveryDroneConfig("Monolith", 35, 12, 0.05f, 2, 1)));
+            relay.Tell(new AddDiscoveryDroneMessage(new DiscoveryDroneConfig("Monolith", 35, 12, 0.05f, 2, 1)));
             Wait();
-            world.Tell(new StartMovingMessage("Monolith"));
+            relay.Tell(new StartMovingMessage("Monolith"));
 
             monitoredEntity = "Monolith";
             monitorTimer.Start();
@@ -302,18 +303,15 @@ namespace DiscoveryDroneAngents.CLI
 
             monitorTimer.Stop();
 
-            Console.WriteLine("Ok, so now we will stop the monolith, and look for a short while on the whole world again.");
+            Console.WriteLine("Ok, so now for a short while let us watch what the relay sees.");
             Wait();
             Wait();
-            Wait();
-            Console.WriteLine(">stop-drone Monolith");
             Wait();
 
-            world.Tell(new StopMovingMessage("Monolith"));
 
-            Console.WriteLine(">monitor start world");
+            Console.WriteLine(">monitor start relay");
 
-            monitoredEntity = "world";
+            monitoredEntity = "relay";
             monitorTimer.Start();
 
             Thread.Sleep(20000);
